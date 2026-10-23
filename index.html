@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>一份礼物</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+
+  body {
+    overflow: hidden;
+    background: radial-gradient(120% 90% at 50% 0%, #241046 0%, #140a2b 42%, #07040f 100%);
+    color: #fff;
+    font-family: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- 背景光晕 & 星光 ---------- */
+  .aura {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(70px);
+    pointer-events: none;
+  }
+  .aura.a { width: 520px; height: 520px; left: -140px; top: -160px; background: rgba(120, 80, 255, .28); }
+  .aura.b { width: 460px; height: 460px; right: -130px; bottom: -140px; background: rgba(255, 90, 120, .22); }
+  .aura.c { width: 380px; height: 380px; left: 45%; top: 40%; background: rgba(255, 200, 90, .10); }
+
+  .stars { position: fixed; inset: 0; pointer-events: none; }
+  .star {
+    position: absolute;
+    width: 3px; height: 3px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 6px rgba(255, 255, 255, .9);
+    animation: twinkle 3.4s ease-in-out infinite;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: .15; transform: scale(.7); }
+    50% { opacity: .95; transform: scale(1); }
+  }
+
+  /* ---------- 主舞台 ---------- */
+  .stage {
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 26px;
+    padding: 24px;
+    text-align: center;
+    z-index: 2;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(24px, 4.6vw, 38px);
+    font-weight: 700;
+    letter-spacing: .06em;
+    background: linear-gradient(100deg, #fff 10%, #ffd98a 45%, #ff9fb4 80%, #fff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 6px 24px rgba(255, 190, 120, .22));
+  }
+  .sub {
+    margin: -10px 0 0;
+    font-size: 14px;
+    letter-spacing: .12em;
+    color: rgba(255, 255, 255, .55);
+  }
+
+  /* ---------- 礼物盒 ---------- */
+  .gift-wrap {
+    position: relative;
+    width: 260px;
+    height: 240px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .gift {
+    position: relative;
+    width: 224px;
+    height: 196px;
+    animation: float 4.6s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  .gift.opened { animation: none; transform: translateY(6px); transition: transform .9s ease; }
+
+  .shadow {
+    position: absolute;
+    left: 50%;
+    bottom: -20px;
+    width: 210px;
+    height: 26px;
+    transform: translateX(-50%);
+    background: radial-gradient(50% 50% at 50% 50%, rgba(0, 0, 0, .6), transparent 72%);
+    filter: blur(3px);
+    transition: opacity .9s ease, transform .9s ease;
+  }
+  .gift.opened .shadow { transform: translateX(-50%) scale(1.15); opacity: .75; }
+
+  /* 盒身 */
+  .box {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 224px;
+    height: 146px;
+    border-radius: 12px;
+    background:
+      linear-gradient(105deg, rgba(255, 255, 255, .28) 0%, rgba(255, 255, 255, 0) 34%),
+      linear-gradient(160deg, #ef4a5e 0%, #c8202f 48%, #8d1020 100%);
+    box-shadow:
+      inset 0 2px 0 rgba(255, 255, 255, .35),
+      inset 0 -26px 40px rgba(0, 0, 0, .28),
+      0 22px 42px rgba(120, 0, 30, .35);
+    transition: transform .9s cubic-bezier(.22, .9, .3, 1);
+  }
+  .gift.opened .box { transform: translateY(2px) scale(.985); }
+
+  /* 盒身竖丝带 */
+  .box::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 40px;
+    height: 100%;
+    transform: translateX(-50%);
+    background: linear-gradient(90deg, #e8a92c 0%, #ffdd8a 45%, #ffe9b8 52%, #e2a12a 100%);
+    box-shadow: 0 0 18px rgba(255, 210, 110, .35);
+    opacity: .96;
+  }
+
+  /* 盒盖 */
+  .lid {
+    position: absolute;
+    left: -9px;
+    top: 0;
+    width: 242px;
+    height: 54px;
+    border-radius: 10px;
+    background:
+      linear-gradient(105deg, rgba(255, 255, 255, .3) 0%, rgba(255, 255, 255, 0) 38%),
+      linear-gradient(180deg, #f65c6e 0%, #d02b3a 55%, #a51726 100%);
+    box-shadow:
+      inset 0 2px 0 rgba(255, 255, 255, .45),
+      inset 0 -14px 22px rgba(0, 0, 0, .22),
+      0 10px 22px rgba(0, 0, 0, .35);
+    transform-origin: 50% 100%;
+    transition: transform .95s cubic-bezier(.3, .85, .28, 1), opacity .55s ease .5s;
+    z-index: 3;
+  }
+  .lid::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 40px;
+    height: 100%;
+    transform: translateX(-50%);
+    background: linear-gradient(90deg, #e8a92c 0%, #ffdd8a 45%, #ffe9b8 52%, #e2a12a 100%);
+  }
+  .gift.opened .lid {
+    transform: translate(-26px, -122px) rotate(-20deg);
+    opacity: 0;
+  }
+
+  /* 蝴蝶结 */
+  .bow {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 132px;
+    height: 74px;
+    transform: translate(-50%, -58px);
+    z-index: 4;
+  }
+  .bow .loop {
+    position: absolute;
+    top: 8px;
+    width: 58px;
+    height: 44px;
+    background: linear-gradient(140deg, #ffe7a8 0%, #ffcf62 40%, #e09a1e 100%);
+    box-shadow: inset 0 -6px 12px rgba(150, 90, 0, .25), 0 6px 14px rgba(0, 0, 0, .18);
+  }
+  .bow .loop.l { left: 0; border-radius: 60% 40% 46% 54% / 62% 58% 42% 38%; transform: rotate(-16deg); }
+  .bow .loop.r { right: 0; border-radius: 40% 60% 54% 46% / 58% 62% 38% 42%; transform: rotate(16deg); }
+  .bow .knot {
+    position: absolute;
+    left: 50%;
+    top: 20px;
+    width: 36px;
+    height: 32px;
+    transform: translateX(-50%);
+    border-radius: 48%;
+    background: radial-gradient(60% 60% at 40% 30%, #fff2c9 0%, #ffd072 45%, #d99417 100%);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, .2);
+  }
+  .bow .tail {
+    position: absolute;
+    top: 44px;
+    width: 22px;
+    height: 34px;
+    background: linear-gradient(180deg, #f4ba3f, #cf8c18);
+    border-radius: 4px 4px 10px 10px;
+    opacity: .95;
+  }
+  .bow .tail.l { left: 40px; transform: rotate(10deg); }
+  .bow .tail.r { right: 40px; transform: rotate(-10deg); }
+  .gift.opened .bow { transition: transform .5s ease; }
+
+  /* 打开时从盒中溢出的光 */
+  .beam {
+    position: absolute;
+    left: 50%;
+    bottom: 118px;
+    width: 300px;
+    height: 300px;
+    transform: translate(-50%, 0) scale(.3);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 236, 180, .9) 0%, rgba(255, 200, 110, .35) 38%, transparent 66%);
+    filter: blur(10px);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .gift.opened .beam {
+    animation: burst 1.4s ease-out forwards;
+  }
+  @keyframes burst {
+    0% { opacity: 0; transform: translate(-50%, 0) scale(.3); }
+    35% { opacity: 1; transform: translate(-50%, -30px) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -60px) scale(1.5); }
+  }
+
+  /* ---------- 按钮 ---------- */
+  .open-btn {
+    position: relative;
+    border: 0;
+    cursor: pointer;
+    padding: 16px 54px;
+    border-radius: 999px;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: .18em;
+    color: #3b1808;
+    background: linear-gradient(100deg, #ffe9b0 0%, #ffc75a 38%, #ff9f7a 100%);
+    box-shadow:
+      0 12px 30px rgba(255, 160, 70, .35),
+      inset 0 1px 0 rgba(255, 255, 255, .8);
+    transition: transform .18s ease, box-shadow .3s ease, opacity .3s ease;
+    isolation: isolate;
+  }
+  .open-btn::after {
+    content: "";
+    position: absolute;
+    inset: -6px;
+    border-radius: inherit;
+    background: linear-gradient(100deg, rgba(255, 220, 140, .8), rgba(255, 140, 120, .55));
+    filter: blur(14px);
+    opacity: .55;
+    z-index: -1;
+    animation: pulse 2.8s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%, 100% { opacity: .35; } 50% { opacity: .8; } }
+  .open-btn:hover { transform: translateY(-2px) scale(1.02); }
+  .open-btn:active { transform: translateY(0) scale(.98); }
+  .open-btn[disabled] { cursor: default; opacity: .5; transform: none; }
+  .open-btn[disabled]::after { animation: none; opacity: .2; }
+
+  .tip {
+    margin: 0;
+    font-size: 12px;
+    letter-spacing: .14em;
+    color: rgba(255, 255, 255, .38);
+  }
+
+  /* ---------- 彩纸 ---------- */
+  .confetti {
+    position: fixed;
+    left: 50%;
+    top: 46%;
+    width: 9px;
+    height: 15px;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 50;
+    animation: pop 1.7s cubic-bezier(.16, .62, .32, 1) forwards;
+  }
+  @keyframes pop {
+    0% { transform: translate(-50%, -50%) rotate(0deg) scale(.6); opacity: 1; }
+    18% { opacity: 1; }
+    100% { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) rotate(var(--rot)) scale(.9); opacity: 0; }
+  }
+
+  /* ---------- 视频弹层 ---------- */
+  .modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: rgba(6, 3, 16, .82);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .45s ease, visibility .45s ease;
+  }
+  .modal.show { opacity: 1; visibility: visible; }
+
+  .player {
+    position: relative;
+    width: min(940px, 94vw);
+    padding: 10px;
+    border-radius: 22px;
+    background: linear-gradient(160deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, .04));
+    border: 1px solid rgba(255, 255, 255, .16);
+    box-shadow: 0 34px 90px rgba(0, 0, 0, .6);
+    transform: translateY(22px) scale(.92);
+    transition: transform .55s cubic-bezier(.2, .9, .3, 1.05);
+  }
+  .modal.show .player { transform: translateY(0) scale(1); }
+
+  .player video {
+    display: block;
+    width: 100%;
+    max-height: 74vh;
+    border-radius: 14px;
+    background: #000;
+    object-fit: contain;
+  }
+
+  .close {
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    background: rgba(255, 255, 255, .92);
+    color: #1a1030;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, .45);
+    transition: transform .2s ease, background .2s ease;
+  }
+  .close:hover { transform: rotate(90deg) scale(1.06); background: #fff; }
+  .close svg { width: 16px; height: 16px; }
+</style>
+</head>
+<body>
+  <div class="aura a"></div>
+  <div class="aura b"></div>
+  <div class="aura c"></div>
+  <div class="stars" id="stars"></div>
+
+  <main class="stage">
+    <h1>有一份礼物，送给你</h1>
+    <p class="sub">点一下，看看里面是什么</p>
+
+    <div class="gift-wrap">
+      <div class="gift" id="gift">
+        <div class="beam"></div>
+        <div class="shadow"></div>
+        <div class="box"></div>
+        <div class="lid">
+          <div class="bow">
+            <span class="loop l"></span>
+            <span class="loop r"></span>
+            <span class="tail l"></span>
+            <span class="tail r"></span>
+            <span class="knot"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button class="open-btn" id="openBtn">打开礼物</button>
+    <p class="tip">打开后视频会自动播放</p>
+  </main>
+
+  <div class="modal" id="modal" aria-hidden="true">
+    <div class="player" role="dialog" aria-label="礼物视频">
+      <button class="close" id="closeBtn" aria-label="关闭">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+          <path d="M6 6l12 12M18 6L6 18" />
+        </svg>
+      </button>
+      <video id="video" src="gift-video-2.mp4" controls playsinline preload="metadata"></video>
+    </div>
+  </div>
+
+  <script>
+    // 生成星光
+    (function () {
+      const box = document.getElementById('stars');
+      const n = 70;
+      let html = '';
+      for (let i = 0; i < n; i++) {
+        const top = Math.random() * 100;
+        const left = Math.random() * 100;
+        const size = (Math.random() * 2 + 1).toFixed(1);
+        const delay = (Math.random() * 3.4).toFixed(2);
+        const opacity = (Math.random() * .5 + .3).toFixed(2);
+        html += `<span class="star" style="top:${top}%;left:${left}%;width:${size}px;height:${size}px;animation-delay:${delay}s;opacity:${opacity}"></span>`;
+      }
+      box.innerHTML = html;
+    })();
+
+    const gift    = document.getElementById('gift');
+    const openBtn = document.getElementById('openBtn');
+    const modal   = document.getElementById('modal');
+    const video   = document.getElementById('video');
+    const closeBtn = document.getElementById('closeBtn');
+
+    const colors = ['#ffd166', '#ff7b8a', '#7ee0ff', '#c8a4ff', '#fff4c2', '#ffb26b'];
+
+    function confetti() {
+      const count = 54;
+      for (let i = 0; i < count; i++) {
+        const p = document.createElement('span');
+        p.className = 'confetti';
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 130 + Math.random() * 260;
+        const tx = Math.cos(angle) * dist;
+        const ty = Math.sin(angle) * dist - 60;
+        const rot = (Math.random() * 900 - 450).toFixed(0);
+        p.style.background = colors[Math.floor(Math.random() * colors.length)];
+        p.style.setProperty('--tx', tx.toFixed(0) + 'px');
+        p.style.setProperty('--ty', ty.toFixed(0) + 'px');
+        p.style.setProperty('--rot', rot + 'deg');
+        p.style.animationDelay = (Math.random() * .25).toFixed(2) + 's';
+        p.style.width = (6 + Math.random() * 7).toFixed(0) + 'px';
+        p.style.height = (10 + Math.random() * 10).toFixed(0) + 'px';
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 2200);
+      }
+    }
+
+    function openGift() {
+      if (openBtn.disabled) return;
+      openBtn.disabled = true;
+      openBtn.textContent = '正在打开…';
+      gift.classList.add('opened');
+      confetti();
+
+      setTimeout(() => {
+        modal.classList.add('show');
+        modal.setAttribute('aria-hidden', 'false');
+        const playing = video.play();
+        if (playing && typeof playing.catch === 'function') {
+          playing.catch(() => {}); // 自动播放被拦截时，用户可点播放键
+        }
+      }, 900);
+
+      setTimeout(() => {
+        openBtn.textContent = '礼物已打开';
+      }, 900);
+    }
+
+    function closeModal() {
+      video.pause();
+      modal.classList.remove('show');
+      modal.setAttribute('aria-hidden', 'true');
+    }
+
+    openBtn.addEventListener('click', openGift);
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('show')) closeModal();
+    });
+    // 点击礼物盒本身也能打开
+    gift.addEventListener('click', openGift);
+  </script>
+</body>
+</html>
